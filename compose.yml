@@ -1,0 +1,77 @@
+services:
+  btc:
+    container_name: btc
+    image: bitcoin/bitcoin:latest
+    command: -printtoconsole
+      -rpcallowip=0.0.0.0/0
+      -rpcbind=0.0.0.0
+      -rpcauth=${RPC_AUTH}
+      -maxconnections=10
+      -txindex=1
+    volumes:
+      - /data/btc:/home/bitcoin/.bitcoin
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'bitcoin-cli -rpcconnect=127.0.0.1 -rpcuser=satoshi -rpcpassword=${RPC_PASSWORD} getblockchaininfo | grep -q ''"initialblockdownload": false''',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - bitcoin_network
+
+  ord:
+    container_name: ord
+    build:
+      context: https://github.com/Th0rgal/ord.git#fix/rust_version
+      dockerfile: Dockerfile
+    command:
+      - ord
+      - --bitcoin-rpc-url=http://btc:8332
+      - --bitcoin-rpc-username=satoshi
+      - --bitcoin-rpc-password=${RPC_PASSWORD}
+      - --index-sats
+      - --index-runes
+      - --index-addresses
+      - server
+      - --http
+    volumes:
+      - /data/ord:/root/.local/share/ord
+      - /data/acme:/home/ord/.acme-cache
+    depends_on:
+      btc:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - bitcoin_network
+
+  nginx:
+    container_name: nginx
+    image: jonasal/nginx-certbot:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
+      - ./user_conf.d:/etc/nginx/user_conf.d
+    env_file:
+      - nginx-certbot.env
+    depends_on:
+      btc:
+        condition: service_healthy
+      ord:
+        condition: service_started
+    networks:
+      - bitcoin_network
+
+volumes:
+  nginx_secrets:
+
+networks:
+  bitcoin_network:
+    name: bitcoin_network
+    driver: bridge
