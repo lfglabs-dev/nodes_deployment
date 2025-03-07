@@ -20,8 +20,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    networks:
-      - bitcoin_network
 
   ord:
     container_name: ord
@@ -45,8 +43,23 @@ services:
       btc:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - bitcoin_network
+
+  starknet:
+    container_name: starknet
+    build:
+      context: .
+      dockerfile: JunoDockerfile
+    environment:
+      - ETH_NODE_URL=${ETH_NODE_URL}
+    volumes:
+      - /data/starknet:/var/lib/juno
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6060/is_alive"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   nginx:
     container_name: nginx
@@ -65,13 +78,7 @@ services:
         condition: service_healthy
       ord:
         condition: service_started
-    networks:
-      - bitcoin_network
 
 volumes:
   nginx_secrets:
-
-networks:
-  bitcoin_network:
-    name: bitcoin_network
-    driver: bridge
+  juno_data:

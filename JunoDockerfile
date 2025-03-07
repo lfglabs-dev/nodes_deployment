@@ -1,0 +1,15 @@
+FROM nethermind/juno:v0.13.2
+
+# Set the working directory
+WORKDIR /var/lib/juno
+
+# Install wget and curl
+RUN apt-get update && apt-get install -y wget curl
+
+# Create entrypoint script
+RUN echo '#!/bin/sh\n\
+exec juno --http --http-port 6060 --http-host 0.0.0.0 --db-path /var/lib/juno --eth-node $ETH_NODE_URL --network mainnet --pending-poll-interval 1s --rpc-cors-enable\n\
+' > /entrypoint.sh && chmod +x /entrypoint.sh
+
+# Use the entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
