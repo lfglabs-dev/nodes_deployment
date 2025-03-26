@@ -80,6 +80,14 @@ services:
       ord:
         condition: service_started
 
+  fordefi_signer:
+    container_name: fordefi_signer
+    image: fordefi.jfrog.io/fordefi/api-signer:latest
+    command: ["/api-signer", "run"]
+    volumes:
+      - fordefi_volume:/storage
+    restart: unless-stopped
+
 volumes:
   nginx_secrets:
   juno_data:
