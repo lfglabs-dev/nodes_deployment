@@ -91,3 +91,5 @@ services:
 volumes:
   nginx_secrets:
   juno_data:
+  fordefi_volume:
+    external: true
