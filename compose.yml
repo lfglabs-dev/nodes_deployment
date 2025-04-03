@@ -11,6 +11,9 @@ services:
     volumes:
       - /data/btc:/home/bitcoin/.bitcoin
     restart: unless-stopped
+    ports: # we only open ZMQ
+      - "28332:28332" # ZMQ blocks
+      - "28333:28333" # ZMQ transactions
     healthcheck:
       test:
         [
