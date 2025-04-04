@@ -8,6 +8,8 @@ services:
       -rpcauth=${RPC_AUTH}
       -maxconnections=10
       -txindex=1
+      -zmqpubrawblock=tcp://0.0.0.0:28332
+      -zmqpubrawtx=tcp://0.0.0.0:28333
     volumes:
       - /data/btc:/home/bitcoin/.bitcoin
     restart: unless-stopped
