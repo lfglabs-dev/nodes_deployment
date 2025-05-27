@@ -2,6 +2,8 @@ services:
   btc:
     container_name: btc
     image: bitcoin/bitcoin:latest
+    # this requires a dummy wallet:
+    # bitcoin-cli -rpcuser=XXX -rpcpassword=XXX createwallet dummy
     command: -printtoconsole
       -rpcallowip=0.0.0.0/0
       -rpcbind=0.0.0.0
@@ -10,6 +12,7 @@ services:
       -txindex=1
       -zmqpubrawblock=tcp://0.0.0.0:28332
       -zmqpubrawtx=tcp://0.0.0.0:28333
+      -wallet=dummy
     volumes:
       - /data/btc:/home/bitcoin/.bitcoin
     restart: unless-stopped
