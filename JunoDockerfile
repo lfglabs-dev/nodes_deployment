@@ -1,4 +1,4 @@
-FROM nethermind/juno:v0.15.6
+FROM nethermind/juno:v0.15.16
 
 # Set the working directory
 WORKDIR /var/lib/juno
